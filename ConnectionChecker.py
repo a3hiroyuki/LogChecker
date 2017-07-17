@@ -4,11 +4,15 @@ from pandas.core.frame import DataFrame
 
 class ConnectionChecker(BaseChecker):
     
-    columnArr = ['ddd', 'eee', 'fff']
+    columnArr = ['Date', 'Label', 'fff']
         
     def __init__(self):
         BaseChecker.__init__(self)
+        self.mTitle = 'CONNTECTION'
             
     def makeDataFrame(self):
-        self.df = DataFrame(BaseChecker.makeDataFrame(self), columns=self.columnArr)
-        print self.df
+        self.mDataframe = DataFrame(BaseChecker.makeDataFrame(self), columns=self.columnArr)
+        print self.mDataframe
+        
+    def checkData(self):
+        BaseChecker.checkData(self)
