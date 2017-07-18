@@ -20,31 +20,21 @@ class NetworkChecker(BaseChecker):
         BaseChecker.checkData(self)
         fig, axe = plt.subplots(1,3)
         
-        filter1 = self.mDataframe['Label'] == '1'
-        data = self.mDataframe[filter1]
-        data1 = data.groupby('fff').size()
-        data1.sort()
-        data1.plot(kind='bar', ax=axe[0])
+        filtered_data = self.getFilteredDataFrame(filter_criteria = self.mDataframe['Label'] == '1')
+        self.plotGroupedDataFrame(df = filtered_data, groupby_column='fff', axe=axe[0])
         
-        filter2 = self.mDataframe['Label'] == '2'
-        data2 = self.mDataframe[filter2].groupby('fff').size()
-        data2.sort()
-        data2.plot(kind='bar', ax=axe[1])
+        filtered_data = self.getFilteredDataFrame(filter_criteria = self.mDataframe['Label'] == '2')
+        self.plotGroupedDataFrame(df = filtered_data, groupby_column='fff', axe=axe[1])
         
-        filter3 = self.mDataframe['Label'] == '3'
-        data3 = self.mDataframe[filter3].groupby('fff').size()
-        data3.sort()
-        data3.plot(kind='bar', ax=axe[2])
+        filtered_data = self.getFilteredDataFrame(filter_criteria = self.mDataframe['Label'] == '3')
+        #self.plotGroupedDataFrame(df = data, groupby_column='fff', axe=axe[2])
+        self.plotCutDataFrame(df=filtered_data, cut_column='fff', cut_num=20, axe=axe[2])
         
     def checkDataPattern(self):
         fig, axe = plt.subplots(1,2)
-        BaseChecker.checkDataPattern(self)
-        #trend = Series(self.mDataframe['fff'] , index=self.mDataframe['Date'])
-        #print self.mDataframe['fff']
-        frame2 = self.mDataframe.set_index(self.mDataframe['Date'])
-        print frame2
-        frame2['Label'] = frame2['Label'].astype(float)
-        #print frame2['Label']
-        frame2['Label'].plot(ax=axe[0])
+        self.plotTimelineDataFrame(plot_column='fff', axe=axe[0])
+        
+        self.plotDownsamplingTimelineDataFrame()
+    
         
         

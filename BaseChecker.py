@@ -36,3 +36,28 @@ class BaseChecker(object):
         
     def getTitle(self):
         return self.mTitle
+    
+    def getFilteredDataFrame(self, filter_criteria):
+        return self.mDataframe[filter_criteria]
+    
+    def plotGroupedDataFrame(self, df, groupby_column, axe):
+        data = df.groupby(groupby_column).size()
+        data.plot(kind='bar', ax=axe)
+        
+    def plotCutDataFrame(self, df, cut_column, cut_num, axe):
+        df[cut_column] = df[cut_column].astype(int)
+        factor = pd.cut(df[cut_column], cut_num)
+        data = df[cut_column].groupby(factor).size()
+        data.plot(kind='bar', ax=axe)
+        
+    def plotTimelineDataFrame(self, plot_column, axe):
+        frame = self.mDataframe.set_index(self.mDataframe['Date'])
+        frame[plot_column] = frame[plot_column].astype(float)
+        frame[plot_column].plot(ax=axe)
+        
+    def plotDownsamplingTimelineDataFrame(self):
+        frame = self.mDataframe.set_index(self.mDataframe['Date'])
+        data = frame['fff'].astype(int)
+        print data
+        print data.resample('S').mean()
+        
