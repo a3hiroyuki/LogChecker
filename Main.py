@@ -11,20 +11,13 @@ from NetworkChecker import NetworkChecker
 from  ConnectionChecker import ConnectionChecker
 
 
-if __name__ == '__main__':
-    
-    path = "C:\\workspace\\python1\\Test500\\src\\tsv\\"
-    
-    files = os.listdir(path)
-    checker_map = {}
+def getAllFileDataInDir(checker_map, dir_path):
     pattern = r"AAA_[A-Z]*"
- 
-    #データの読出し
+    files = os.listdir(dir_path)
     for file in files:
         matchObj = re.match(pattern , file)
         if matchObj != None:
-            strNum =  matchObj.end()
-            title = file[:strNum]
+            title = file[:matchObj.end()]
             if checker_map.get(title) == None:
                 if title == 'AAA_NETWORK':
                     checker_map[title] = NetworkChecker()
@@ -32,10 +25,28 @@ if __name__ == '__main__':
                     checker_map[title] = ConnectionChecker()
                 else:
                     continue
-            f = open(path + file, 'r')
+            f = open(dir_path + file, 'r')
             readText = f.read()
             checker_map.get(title).setText(readText)
+    print checker_map
+
+
+if __name__ == '__main__':
     
+    #path = "C:\\workspace\\python1\\Test500\\src\\tsv\\"
+    global path
+    path =  "tsv\\"
+    checker_map = {}
+    dir_list = []
+    
+    dirs = os.listdir(path)  
+    for item in dirs:
+        if os.path.isdir(path + item):
+            dir_list.append(item)
+        
+    for dir_name in dir_list:
+        getAllFileDataInDir(checker_map, path + dir_name + '\\')
+ 
     #データフレームの生成
     for key in checker_map.keys():
         checker = checker_map.get(key)

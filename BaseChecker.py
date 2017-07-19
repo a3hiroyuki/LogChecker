@@ -1,6 +1,7 @@
 from pandas import Series, DataFrame
 import pandas as pd
 from datetime import datetime
+import os
 
 class BaseChecker(object):
     
@@ -42,22 +43,29 @@ class BaseChecker(object):
     
     def plotGroupedDataFrame(self, df, groupby_column, axe):
         data = df.groupby(groupby_column).size()
+        data.sort(ascending=False)
         data.plot(kind='bar', ax=axe)
         
     def plotCutDataFrame(self, df, cut_column, cut_num, axe):
-        df[cut_column] = df[cut_column].astype(int)
         factor = pd.cut(df[cut_column], cut_num)
         data = df[cut_column].groupby(factor).size()
         data.plot(kind='bar', ax=axe)
         
     def plotTimelineDataFrame(self, plot_column, axe):
         frame = self.mDataframe.set_index(self.mDataframe['Date'])
-        frame[plot_column] = frame[plot_column].astype(float)
         frame[plot_column].plot(ax=axe)
         
-    def plotDownsamplingTimelineDataFrame(self):
-        frame = self.mDataframe.set_index(self.mDataframe['Date'])
-        data = frame['fff'].astype(int)
-        print data
-        print data.resample('S').mean()
+    def plotDownsamplingTimelineDataFrame(self, df, plot_column, time_slice, how, axe):
+        frame = df.set_index(df['Date'])
+        frame2 =  frame[plot_column].resample(time_slice, how)
+        print frame2
+        frame2.plot(kind='bar', ax=axe)
+        
+    def saveFile(self, df, item_name):
+        dir_path =  "tsv\\" + self.mTitle + '1'
+        if os.path.isdir(dir_path) == False:
+            os.mkdir(dir_path)    
+        df.to_csv(dir_path + '\\' + item_name + '.txt')
+
+        
         
