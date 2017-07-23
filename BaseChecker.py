@@ -21,10 +21,14 @@ class BaseChecker(object):
         data = []
         rowArr = self.mText.split('\n')
         for row in rowArr:
-            colArr = row.split('\t')
-            colArr[0] = datetime.fromtimestamp(float(colArr[0]))
-            data.append(colArr)
+            self.parseRecord( data, row)
+        print data
         return data
+    
+    def parseRecord(self, data, row):
+        colArr = row.split('\n')
+        colArr[0] = datetime.fromtimestamp(float(colArr[0]))
+        data.append(colArr)
             
     def getGroupbyData(self):
         return self.mDataframe.groupby('Label').size()
@@ -56,10 +60,14 @@ class BaseChecker(object):
         frame[plot_column].plot(ax=axe)
         
     def plotDownsamplingTimelineDataFrame(self, df, plot_column, time_slice, how, axe):
-        frame = df.set_index(df['Date'])
-        frame2 =  frame[plot_column].resample(time_slice, how)
-        print frame2
-        frame2.plot(kind='bar', ax=axe)
+        frame = df.set_index('Date')
+        frame2 = frame[plot_column]
+        frame3 =  frame2.resample(time_slice, how=how)
+        frame4 = pd.DataFrame(frame3)
+        #print pd.merge(self.mDataframe, frame2, on='Date', how='inner')
+        print pd.merge(frame, frame4, left_index=True, right_index=True)
+        #print frame2
+        #frame2.plot(kind='bar', ax=axe)
         
     def saveFile(self, df, item_name):
         dir_path =  "tsv\\" + self.mTitle + '1'

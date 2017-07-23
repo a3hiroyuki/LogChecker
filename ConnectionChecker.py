@@ -2,7 +2,7 @@
 from BaseChecker import BaseChecker
 from pandas.core.frame import DataFrame
 
-class ConnectionChecker(BaseChecker):
+class CONNECTIONChecker(BaseChecker):
     
     columnArr = ['Date', 'Label', 'fff']
         

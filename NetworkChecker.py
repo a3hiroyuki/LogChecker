@@ -4,7 +4,7 @@ from pandas.core.frame import DataFrame
 from pandas import Series
 import matplotlib.pyplot as plt
 
-class NetworkChecker(BaseChecker):
+class NETWORKChecker(BaseChecker):
     
     columnArr = ['Date', 'Label', 'fff']
     dtypes = {'Label': int, 'fff': int}
@@ -35,14 +35,11 @@ class NetworkChecker(BaseChecker):
         self.plotCutDataFrame(df=filtered_data, cut_column='fff', cut_num=20, axe=axe[2])
         
     def checkDataPattern(self):
-        fig, axe = plt.subplots(1,2)
-        self.plotTimelineDataFrame(plot_column='fff', axe=axe[0])
-        
-        
+        fig= plt.figure()
+        ax = fig.add_subplot(1,1,1)
         filtered_data = self.getFilteredDataFrame(filter_criteria = self.mDataframe['Label'] == 3)
-        self.plotDownsamplingTimelineDataFrame(df = filtered_data, plot_column='fff', time_slice='4S', how='sum', axe=axe[0])
+        self.plotDownsamplingTimelineDataFrame(df = filtered_data, plot_column='fff', time_slice='4S', how='sum', axe=ax)
         
-        self.plotDownsamplingTimelineDataFrame(df = filtered_data, plot_column='fff', time_slice='4S', how='mean', axe=axe[1])
     
         
         
