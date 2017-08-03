@@ -10,12 +10,13 @@ import os
 import datetime
 import _winreg
 import sys
+import re
 
 #年月日
 str_date = datetime.datetime.today().strftime("%Y%m%d")
 
 #commandを定義したマップ
-cmd_dict = dict(ssh = 'winScp.com ',
+cmd_dict = dict(ssh = 'winScp.com %s',
                 cd = 'cd /home/abe/%caw_id%',
                 python = 'call python Main.py',
                 ls = 'call ls -lt tsv',
@@ -41,7 +42,7 @@ enum_keys_dict = {}
 def get_tsv_file(session, caw_id, start_date, end_date):
     
     #plinkとセッション名を利用して接続する
-    sp = subprocess.Popen(cmd_dict['ssh'] + session, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+    sp = subprocess.Popen(cmd_dict['ssh'] % (session), stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
     
     #caw_idを置換
     shell_cmd_conv = shell_cmd.replace('%caw_id%', caw_id)
@@ -94,44 +95,41 @@ def get_datetime(input_str):
 
 #セクションIDの入力チェック
 def check_section_id(input_str):
-    input_num = int(input_str)
-    if input_num >= 0 and input_num < len(enum_keys_dict):
-        return True
-    print "範囲外です"
+    if input_str.isdigit:
+        input_num = int(input_str)
+        if input_num >= 0 and input_num < len(enum_keys_dict):
+            return True
+        print "範囲外です"
     return False
 
 def check_caw_id(input_str):
-    if len(input_str) == 8:
+    if re.match(r"[0-9]{8}", input_str) and len(input_str) == 8:
         return True
     else:
-        print '8桁で入力してください'
+        print '8桁の数値を入力してください'
         return False
 
 #入力した日時か範囲内かどうかチェック
 def check_date(input_str):
-    if len(input_str) == 8:
-        date = get_datetime(input_str)
-        if date < datetime.date(2020, 1, 1) and date > datetime.date(2015, 1, 1):
-            return True
-        else:
-            print '範囲外です'
+    if re.match(r"[0-9]{8}", input_str) and len(input_str) == 8:
+        try:
+            date = get_datetime(input_str)
+            if date < datetime.date(2020, 1, 1) and date > datetime.date(2015, 1, 1):
+                return True
+            else:
+                print '指定範囲外の年月日が入力されました'
+        except:
+            print '異常な年月日が入力されました'
     else:
-        print '8桁で入力してください'
+        print '8桁の数値で入力してください'
     return False
 
 #条件にあう文字列を取得するまでループする
 def raw_input_wrapper(input_check):
     while True:
-        input_test_number = raw_input('>')
-        try:
-            if input_test_number.isdigit() == True:
-                print 'OK'
-                if input_check(input_test_number) == True:
-                    return input_test_number
-            else:
-                print '数値を入力してください'
-        except Exception:
-            print 'exception!'
+        input_str = raw_input('>')
+        if input_check(input_str) == True:
+            return  input_str
         print 'もう一度入力してください'
  
 #レジストリのキーを辞書に格納 
@@ -154,7 +152,7 @@ if __name__ == '__main__':
         _winreg.CloseKey(reg_winscp)
     
     if len(enum_keys_dict) == 0:
-        print 'セッションが存在しません'
+        print 'セッションが存在しません、終了します'
         sys.exit()
     
     print '以下のセッション番号を選択してください。'
