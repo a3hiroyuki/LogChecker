@@ -4,11 +4,29 @@ Created on 2017/08/02
 @author: hiroy
 '''
 
+import datetime
+import _winreg
+import sys
+import time
+import itertools
+
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 start = datetime.strptime('20120111', '%Y%m%d')
 end = datetime.strptime('20120111', '%Y%m%d')
+
+#threading.Thread(target=animate).start()
+is_done = False
+#ダウンロ‐ド時のアニメーション
+def animate():
+    for c in itertools.cycle(['.', '..', '...', '   ']):
+        if  is_done == True:
+            break
+        sys.stdout.write("\rdownLoading" + c)
+        sys.stdout.flush()
+        time.sleep(1)  
+    sys.stdout.write('\rDone!     ')
 
 def get_month_first_day(date):
     return datetime(day=1, month=date.month, year=date.year)
