@@ -19,13 +19,7 @@ import random
 str_date = datetime.today().strftime("%Y%m%d")
 
 #commandを定義したマップ
-cmd_dict = dict(ssh = 'winScp.com ',
-                cd = 'cd /home/abe/',
-                python = 'call python Main.py',
-                ls = 'call ls -lt tsv',
-                exit = 'exit',
-                get = 'get /home/abe/tsv',
-                move = 'move' )
+
 
 #履歴を取得するサーバーのリスト
 server_session_list = ['aaa', 'aaa', 'aaa']
@@ -34,7 +28,7 @@ server_session_list = ['aaa', 'aaa', 'aaa']
 tagrget_dir = './/' + str_date
 
 #サーバーで実行するShellコマンド
-shell_cmd = '%(cd)s\n%(python)s\n%(ls)s\n%(exit)s\n' % cmd_dict
+
 
 def report(message):
     sys.stdout.write(message)
@@ -59,20 +53,28 @@ class Anime():
 
 class Downloader:
     
-    def __init__(self, session):
+    def __init__(self, session, id):
         self.session = session
+        self.id = id
         
     def get_history_file(self):
-        
-        sp = subprocess.Popen(cmd_dict['ssh'] + self.session, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
-    
-        #シェルを連続実行する
-        sp.stdin.write(shell_cmd.encode('utf-8'))
-        sp.stdin.close()
-        
-        lines = sp.stdout.read().decode('utf-8')
-        
-        line_arr = lines.split('\n')
+        cmd_dict = dict(ssh = 'winScp.com ',
+                cd = 'cd /home/abe/',
+                python = 'call python Main.py',
+                ls = 'call ls -lt tsv',
+                exit = 'exit',
+                get = 'get /home/abe/tsv',
+                move = 'move' )
+        with subprocess.Popen(cmd_dict['ssh'] + self.session, 
+                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, 
+                              shell=True) as sp:
+            
+            cmd_dict['python'] = 'call python Main' + str(self.id) + '.py'
+            cmd_dict['ls'] = 'call ls -lt tsv' + str(self.id)
+            shell_cmd = '%(cd)s\n%(python)s\n%(ls)s\n%(exit)s\n' % cmd_dict
+            report (shell_cmd)
+            stdout, stderr = sp.communicate(shell_cmd.encode('utf-8'))
+            line_arr = stdout.decode('utf-8').split('\n')
     
         #シェルの結果からファイル名を取得する
         file_name = ''
@@ -85,30 +87,26 @@ class Downloader:
             if cmd_dict['ls'] in line:
                 is_exe_command = True
                 report ('exe command\n' )
-            line = sp.stdout.readline()
         report (file_name + '\n')
-        
-        sp.stdout.close()
-        
         self.file_name = file_name
     
     
     def get_file(self):
         #getによりファイルをダウンロードする
         num = random.randint(1,10000)
-        sp = subprocess.Popen(cmd_dict['ssh'] + self.session, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
-        get_cmd = '%s/%s %s\n%s\n' % (cmd_dict['get'], self.file_name, 'C:\\Users\\hiroy\\Desktop\\ggg\\' + str_date + '\\aaa' + str(num)+ '.txt' , cmd_dict['exit'])
-        #get_cmd = '%s\n' % (cmd_dict['exit'])
-        #print (get_cmd)
-        sp.stdin.write(get_cmd.encode('utf-8'))
-        sp.stdin.close()
-        
-        lines = sp.stdout.read().decode('utf-8')
-        '''
-        for line in lines.split('\n'):
-            report (line)
-        '''
-        sp.stdout.close()
+        cmd_dict = dict(ssh = 'winScp.com ',
+                cd = 'cd /home/abe/',
+                python = 'call python Main.py',
+                ls = 'call ls -lt tsv',
+                exit = 'exit',
+                get = 'get /home/abe/tsv',
+                move = 'move' )
+        cmd_dict['get'] = 'get /home/abe/tsv' + str(self.id)
+        with subprocess.Popen(cmd_dict['ssh'] + self.session, 
+                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, 
+                              shell=True) as sp:
+            get_cmd = '%s/%s %s\n%s\n' % (cmd_dict['get'], self.file_name, 'C:\\Users\\hiroy\\Desktop\\ggg\\' + str_date + '\\aaa' + str(num)+ '.txt' , cmd_dict['exit'])
+            stdout, stderr = sp.communicate(get_cmd.encode('utf-8'))
         
     def download(self):
         self.get_history_file()
@@ -130,8 +128,8 @@ def create_threads(jobs, results, concurrency):
         thread.start()
         
 def add_jobs(jobs, server_session_list):
-    for session in server_session_list:
-        jobs.put(Downloader(session))
+    for i, session in enumerate(server_session_list):
+        jobs.put(Downloader(session, i))
         
 def process(jobs, results):
     try:
