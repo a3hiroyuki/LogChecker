@@ -42,12 +42,12 @@ def plot_type_distribution():
         ax = fig.add_subplot(1, len(groupby_frame_dict), 1)
         ax.set_title(key)
         value.plot(kind='bar', ax = ax)
-        
+        plot_value(ax, value)
     plt.show()
     
 def plot_calc_data_per_day(name='DATE'):
     first_date = datetime.strptime('2017/1/1', '%Y/%m/%d')
-    end_date = datetime.strptime('2017/1/10', '%Y/%m/%d')
+    end_date = datetime.strptime('2017/1/3', '%Y/%m/%d')
     calc_data_dict = {key : value 
                       for key, value in _cheker_manager.getDataFrame(name).getCalcDataDictPerDay().items()
                       if key >= first_date and key <= end_date}
@@ -60,15 +60,23 @@ def plot_calc_data_per_day(name='DATE'):
     fig = plt.figure()
     for key, value in calc_data_dict.items():
         ax = fig.add_subplot(row_num, col_num, count)
-        ax.set_title(key)
-        #ax.plot(value)
-        #value.plot(kind='bar', ax = ax)
+        ax.set_title(key)       
+        plot_value(ax, value)
         value.index = value.index.hour
-        value.plot(kind='bar', ax = ax)
+        #value.plot(kind='bar',ax = ax)
+        ax.bar(value.index, value.values)
         count += 1 
     plt.show()
     
-    
+def plot_value(ax, value):
+    for i, (x, y) in enumerate(zip(value.index, value.values)):
+        if type(x) is str:
+            x = i
+        elif isinstance(x, datetime):
+            x = x.hour
+        print (x + y)
+        ax.text(x, y, y, ha='center', va='bottom')
+
 def set_param():
     font_option = {'family' : 'monospace',
                    'weight' : 'bold',
@@ -80,11 +88,12 @@ if __name__ == '__main__':
     
     
     create_dataframe()
-    #plot_type_distribution()
-    #plot_calc_data_per_day()
     df = _cheker_manager.getDataFrame('DATE')
+    plot_calc_data_per_day()
+    #plot_type_distribution()
     #print (df)
     
+    '''
     df['BOOL100'] = df['kw'].apply( lambda x: '○' if x > 2300 else '×')
     print (df)
     se = df.groupby(['MONTH', 'BOOL100']).size()
@@ -96,6 +105,7 @@ if __name__ == '__main__':
     
     df3 = pd.merge(df,df2, left_on='MONTH', right_index=True)
     print (df3)
+    '''
     '''
     #データの分布の確認
     for key in checker_map.keys():
